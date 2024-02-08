@@ -27,8 +27,6 @@ class Greed_Simulator:
         self.term = blessed.Terminal()
         self.colors = [self.term.color(i + 100) for i in range(9)]
 
-
-
     def display_board(self):
         # print the game board in an ugly way (for debugging)
         for row in self.game_board:
