@@ -178,5 +178,5 @@ class Greed_Simulator:
 
 
 
-g = Greed_Simulator(10, 15)
-g.run_game()
+# g = Greed_Simulator(10, 15)
+# g.run_game()
