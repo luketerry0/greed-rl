@@ -87,6 +87,7 @@ class Greed_Simulator:
             return -1
 
     def move(self, input):
+        print("manual move")
         # make the required move
         move = (0, 0)
         match input:
