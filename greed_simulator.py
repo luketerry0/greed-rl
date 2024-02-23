@@ -4,12 +4,21 @@ import blessed
 
 # class to simulate a greed board
 class Greed_Simulator:
-    def __init__(self, height, width):
+    def __init__(self, height, width, static_board = False):
         # game mode, or algorithm used to make moves
         self.mode = "manual"
 
         # create the game board
-        self.game_board = [[math.floor(random.random() * 9) + 1 for x in range(width)] for y in range(height)]
+        # allow for a static board read from a file
+        self.static_board = static_board
+        if self.static_board:
+            f = open("static_board.txt", "r")
+            self.game_board = []
+            rows = f.readlines()
+            for row in rows:
+                self.game_board.append([int(x) for x in row[:-1]])
+        else:
+            self.game_board = [[math.floor(random.random() * 9) + 1 for x in range(width)] for y in range(height)]
 
         # define where the player is
         self.player_x = math.floor(random.random() * width)
@@ -27,10 +36,21 @@ class Greed_Simulator:
         self.term = blessed.Terminal()
         self.colors = [self.term.color(i + 100) for i in range(9)]
 
+    def reset_static_board(self):
+        # resets the static board to the original
+        f = open("static_board.txt", "r")
+        self.game_board = []
+        rows = f.readlines()
+        for row in rows:
+            self.game_board.append([int(x) for x in row[:-1]])
+
+
     def display_board(self):
         # print the game board in an ugly way (for debugging)
         for row in self.game_board:
-            print(row)
+            for element in row:
+                print(element, end='')
+            print()
 
     def enumerate_legal_moves(self):
         # catalogue legal moves
@@ -65,6 +85,7 @@ class Greed_Simulator:
         self.legal_moves_arr = legal_moves_arr
 
     def execute_move(self,direction):
+        self.enumerate_legal_moves()
         # moves in a direction as given by a tuple (0,0)
         # returns a -1 if the move is illegal, and the number of spaces moved if the move is legal
         if direction in self.legal_moves_arr:
@@ -81,13 +102,15 @@ class Greed_Simulator:
             # update score
             self.score += magnitude
 
+            #update the legal moves
+            self.enumerate_legal_moves()
+
             #return
             return magnitude
         else:
             return -1
 
     def move(self, input):
-        print("manual move")
         # make the required move
         move = (0, 0)
         match input:
@@ -157,8 +180,6 @@ class Greed_Simulator:
                 # update the board
                 self.update_board(move[0], move[1])
                 
-                self.enumerate_legal_moves()
-
 
         print("Game Over, Score: %s" % self.score)
 
@@ -179,5 +200,5 @@ class Greed_Simulator:
 
 
 
-# g = Greed_Simulator(10, 15)
+# g = Greed_Simulator(15, 55)
 # g.run_game()
