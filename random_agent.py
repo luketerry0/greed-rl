@@ -58,4 +58,5 @@ class Random(Greed_Simulator):
 
     
 e = Random()
-e.evaluate()
+# e.evaluate()
+e.run_game()
