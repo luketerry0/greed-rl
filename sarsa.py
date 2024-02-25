@@ -9,7 +9,7 @@ A class which encapsulates a simple SARSA temporal difference learning agent pla
 '''
 class SARSA(Greed_Simulator):
 
-    def __init__(self, height=15, width=55, model = None, alpha = 0.01, epsilon = 0.01, gamma = 1):
+    def __init__(self, height=15, width=55, model = None, alpha = 0.01, gamma = 1):
         # initialize the display and simulator to listen here for input
         super().__init__(height, width, True)
         self.mode = "automagic"
@@ -28,7 +28,13 @@ class SARSA(Greed_Simulator):
 
         # initialize an array to keep track of the constants of the agent
         self.episodes = 1
-        self.epsilon = epsilon
+
+        # after epsilon_decay_cliff visits to a state, the epsilon value will be decay by epsilon_decay_rate each episode
+        self.epsilon = 0.01
+        self.epsilon_decay_rate = 0.85
+        self.epsilon_decay_frequency = 1000
+        self.epsilon_decay_cliff = 0
+
         self.ALPHA = alpha
         self.GAMMA = gamma
         self.moves = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
@@ -40,10 +46,19 @@ class SARSA(Greed_Simulator):
     # define the policy of the agent
     def pi(self, x, y):
         #epsilon greedy, choose the best move with probability 1 - epsilon
+        move = None
         if self.rng.random() >= self.epsilon:
-            return self.moves[np.argmax(self.Q[x][y])]
+            move =  self.moves[np.argmax(self.Q[x][y])]
         else:
-            return self.moves[self.rng.integers(0, 8)]
+            move =  self.moves[self.rng.integers(0, 8)]
+        # if (self.episodes % self.epsilon_decay_frequency == 0):
+        #     print(self.episodes)
+        #     self.epsilon *= self.epsilon_decay_rate
+        
+        return move
+
+        
+        
             
     def move(self, input, sleep = True):
         if sleep:
@@ -70,7 +85,7 @@ class SARSA(Greed_Simulator):
     # trains for a specified number of episodes
     def train(self, episodes, save_name = None, verbose = True):
         UPDATE_FREQUENCY = 1000
-        SAVE_FREQUENCY = 100000
+        SAVE_FREQUENCY = 50000
         self.runScores = np.array([])
 
         init_x = self.player_x
@@ -83,10 +98,6 @@ class SARSA(Greed_Simulator):
             self.player_y = init_y
             self.score = 0
             self.enumerate_legal_moves()
-            #self.episodes += 1
-
-            #self.Q = np.full(self.Q.shape, -1 ,dtype=float)
-
 
             while len(self.legal_moves_arr) > 0:
                 # make a move
@@ -98,11 +109,14 @@ class SARSA(Greed_Simulator):
                 print("Episode %s: -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" % i)
                 print("  Average Score in past: %s" % round(np.average(self.runScores[i - UPDATE_FREQUENCY:]), 2))
                 print("  Standard Deviation in past: %s" % round(np.std(self.runScores[i - UPDATE_FREQUENCY:]), 2))
-
+                print("  Epsilon: %s" % self.epsilon)
+            
             if i % SAVE_FREQUENCY == 0 and i != 0:
                 np.save("sarsa_" + str(i), self.Q)
 
             self.runScores = np.append(self.runScores, self.score)
+            self.episodes += 1
+
         # print summary statistics
         print("  Average Score: %s" % (sum(self.runScores) / len(self.runScores)))
         print("  Max Score: %s" % max(self.runScores))
@@ -120,9 +134,9 @@ class SARSA(Greed_Simulator):
             
 
     
-e = SARSA(15, 55)# "sarsa_999.npy")
-e.train(10000000)
+# e = SARSA(15, 55)# "sarsa_999.npy")
+# e.train(10000000)
 
-# e = SARSA(15, 55, "sarsa_100000.npy")
-# e.run_game()
+e = SARSA(15, 55, "sarsa_250000.npy",)
+e.run_game()
 
