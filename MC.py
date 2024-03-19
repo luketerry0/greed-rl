@@ -11,7 +11,7 @@ class which encapsulates an agent moving randomly in Greed
 
 class MC(Greed_Simulator):
 
-    def __init__(self, height=15, width=55, model = None, epsilon = 0.075, gamma = .1):
+    def __init__(self, height=15, width=55, model = False, epsilon = 0.075, gamma = .1):
         super().__init__(height, width, True)
         self.mode = "automagic"
         self.colors = [self.term.color(i + 30) for i in range(9)]
@@ -19,7 +19,7 @@ class MC(Greed_Simulator):
         self.player_x = 27
         self.player_y = 7
 
-        if model is not None:
+        if model:
             self.Q = np.load(model)
         else:
             self.Q = np.full((width, height, 8), 0, dtype=float)

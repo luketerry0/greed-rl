@@ -9,7 +9,7 @@ class which encapsulates an agent utilizing TD learning in Greed
 '''
 class TD(Greed_Simulator):
     
-    def __init__(self, height=15, width=55, model = None, epsilon = 0.05, alpha = 0.5, gamma = 1):
+    def __init__(self, height=15, width=55, model = False, epsilon = 0.05, alpha = 0.5, gamma = 1):
         # initialize the display and simulator to listen here for input
         super().__init__(height, width, True)
         self.mode = "automagic"
@@ -21,7 +21,7 @@ class TD(Greed_Simulator):
 
 
         # initialize an array to keep track of the values of each state
-        if model is not None:
+        if model:
             self.V = np.load(model)
         else:
             self.V = np.full((width, height), 0 ,dtype=float)
@@ -154,6 +154,53 @@ class TD(Greed_Simulator):
 
         return_queue.put([np.mean(scores), np.std(scores), self.ALPHA, self.GAMMA, self.epsilon])
         return
+    
+    # trains for a specified number of episodes
+    def train(self, episodes, save_name = None, verbose = True):
+        UPDATE_FREQUENCY = 1000
+        SAVE_FREQUENCY = 50000
+        self.runScores = np.array([])
+
+        init_x = self.player_x
+        init_y = self.player_y
+        for i in range(episodes):
+
+            # reset the game
+            self.reset_static_board()
+            self.player_x = init_x
+            self.player_y = init_y
+            self.score = 0
+            self.enumerate_legal_moves()
+
+            while len(self.legal_moves_arr) > 0:
+                # make a move
+                move = self.move(None, False)
+                #print(move)
+            if verbose and i % UPDATE_FREQUENCY == 0 and i != 0:
+                # plt.plot(self.runScores[:-UPDATE_FREQUENCY])
+                # plt.show()
+                print("Episode %s: -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" % i)
+                print("  Average Score in past: %s" % round(np.average(self.runScores[i - UPDATE_FREQUENCY:]), 2))
+                print("  Standard Deviation in past: %s" % round(np.std(self.runScores[i - UPDATE_FREQUENCY:]), 2))
+                print("  Epsilon: %s" % self.epsilon)
+            
+            if i % SAVE_FREQUENCY == 0 and i != 0:
+                np.save("TD_" + str(i), self.V)
+
+            self.runScores = np.append(self.runScores, self.score)
+            self.episodes += 1
+
+        # print summary statistics
+        print("  Average Score: %s" % (sum(self.runScores) / len(self.runScores)))
+        print("  Max Score: %s" % max(self.runScores))
+
+        # save the final state-action values
+        if save_name is None:
+            np.save("sarsa_" + str(i), self.V)
+        else:
+            np.save(save_name + "_" + str(i), self.V)
+
+        return (np.average(self.runScores), np.std(self.runScores))
 
 #e = TD(15, 55)
 #e.train(10000)
