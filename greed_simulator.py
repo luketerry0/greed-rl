@@ -8,6 +8,10 @@ class Greed_Simulator:
         # game mode, or algorithm used to make moves
         self.mode = "manual"
 
+        self.static_board = True
+
+
+
         # create the game board
         # allow for a static board read from a file
         self.static_board = static_board
@@ -21,8 +25,10 @@ class Greed_Simulator:
             self.game_board = [[math.floor(random.random() * 9) + 1 for x in range(width)] for y in range(height)]
 
         # define where the player is
-        self.player_x = math.floor(random.random() * width)
-        self.player_y = math.floor(random.random() * height)
+        # self.player_x = math.floor(random.random() * width)
+        # self.player_y = math.floor(random.random() * height)
+        self.player_x = 27
+        self.player_y = 7
         self.game_board[self.player_y][self.player_x] = 0
 
         # define the legal moves
@@ -45,11 +51,19 @@ class Greed_Simulator:
             self.game_board.append([int(x) for x in row[:-1]])
 
 
-    def display_board(self):
+    def display_board(self, x_cursor, y_cursor):
         # print the game board in an ugly way (for debugging)
+        x = -1
+        y = -1
         for row in self.game_board:
+            y += 1
+            x = -1
             for element in row:
-                print(element, end='')
+                x += 1
+                if x == x_cursor and y == y_cursor:
+                    print("@", end='')
+                else:
+                    print(element, end='')
             print()
 
     def enumerate_legal_moves(self):
@@ -198,7 +212,3 @@ class Greed_Simulator:
         #draw the player
         print(self.term.mediumorchid1_on_seashell2 + self.term.move(self.player_y, self.player_x) + '@')
 
-
-
-# g = Greed_Simulator(15, 55)
-# g.run_game()
